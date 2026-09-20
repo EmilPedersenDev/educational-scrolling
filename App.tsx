@@ -13,18 +13,12 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-} from '@expo-google-fonts/inter';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { SourceSerif4_600SemiBold } from '@expo-google-fonts/source-serif-4';
 
 import { ArticleExpanded } from './src/components/ArticleExpanded';
 import { DayFilter } from './src/components/DayFilter';
 import { FeedCard } from './src/components/FeedCard';
-import { HistoryButton } from './src/components/HistoryButton';
 import { PageDots } from './src/components/PageDots';
 import { ProgressBar } from './src/components/ProgressBar';
 import { useDailyContent } from './src/hooks/useDailyContent';
@@ -77,7 +71,6 @@ function Feed({
 
       <View style={styles.topBar}>
         <DayFilter days={days} selected={selected} onSelect={onSelectDay} />
-        <HistoryButton />
       </View>
 
       <View style={styles.pager} onLayout={(e) => setPagerHeight(e.nativeEvent.layout.height)}>
@@ -159,7 +152,6 @@ export default function App() {
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
-    Inter_700Bold,
     SourceSerif4_600SemiBold,
   });
 

@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   label: {
-    fontFamily: fonts.sansBold,
+    fontFamily: fonts.sansMedium,
     fontSize: 11,
     letterSpacing: 1,
     color: colors.accent,

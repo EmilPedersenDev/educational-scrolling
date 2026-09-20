@@ -73,9 +73,7 @@ export function FeedCard({ item, height, onExpand }: Props) {
             <ArrowDown size={12} color={colors.accent} />
           </Pressable>
         )}
-        <Text style={styles.readTime}>
-          {truncated ? `${minutes} min read` : `${minutes} min read · fits on screen`}
-        </Text>
+        <Text style={styles.readTime}>{minutes} min read</Text>
       </View>
     </View>
   );
