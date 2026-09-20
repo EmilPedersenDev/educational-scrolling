@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDown } from 'lucide-react-native';
+import { CategoryTag } from './CategoryTag';
 import { DailyContent } from '../lib/supabase';
+import { parseTitle } from '../lib/parseTitle';
 import { readTimeMinutes } from '../lib/readTime';
 import { colors, fonts } from '../theme';
 
-const SPACER_HEIGHT = 44;
-const GAP = 16;
-const ACTION_ROW_HEIGHT = 48;
+const OUTER_GAP = 16;
 const BOTTOM_BREATHING_ROOM = 8;
 const MIN_EXCERPT_HEIGHT = 60;
 
@@ -19,17 +19,23 @@ type Props = {
 };
 
 export function FeedCard({ item, height, onExpand }: Props) {
-  const [titleHeight, setTitleHeight] = useState<number | null>(null);
+  const { category, title } = parseTitle(item.title);
+  const [headerHeight, setHeaderHeight] = useState<number | null>(null);
+  const [footerHeight, setFooterHeight] = useState<number | null>(null);
   const [naturalExcerptHeight, setNaturalExcerptHeight] = useState<number | null>(null);
   const minutes = readTimeMinutes(item.content);
 
-  const measured = titleHeight !== null && naturalExcerptHeight !== null;
-  const chromeHeight = SPACER_HEIGHT + (titleHeight ?? 0) + ACTION_ROW_HEIGHT + GAP * 3 + BOTTOM_BREATHING_ROOM;
+  const measured = headerHeight !== null && footerHeight !== null && naturalExcerptHeight !== null;
+  const chromeHeight = (headerHeight ?? 0) + (footerHeight ?? 0) + OUTER_GAP * 2 + BOTTOM_BREATHING_ROOM;
   const availableExcerptHeight = Math.max(MIN_EXCERPT_HEIGHT, height - chromeHeight);
   const truncated = measured && naturalExcerptHeight! > availableExcerptHeight;
 
-  const handleTitleLayout = (event: LayoutChangeEvent) => {
-    if (titleHeight === null) setTitleHeight(event.nativeEvent.layout.height);
+  const handleHeaderLayout = (event: LayoutChangeEvent) => {
+    if (headerHeight === null) setHeaderHeight(event.nativeEvent.layout.height);
+  };
+
+  const handleFooterLayout = (event: LayoutChangeEvent) => {
+    if (footerHeight === null) setFooterHeight(event.nativeEvent.layout.height);
   };
 
   const handleExcerptLayout = (event: LayoutChangeEvent) => {
@@ -38,11 +44,11 @@ export function FeedCard({ item, height, onExpand }: Props) {
 
   return (
     <View style={[styles.card, { height }]}>
-      <View style={styles.spacer} />
-
-      <Text style={styles.title} onLayout={handleTitleLayout}>
-        {item.title}
-      </Text>
+      <View style={styles.header} onLayout={handleHeaderLayout}>
+        <View style={styles.topSpacer} />
+        {category && <CategoryTag label={category} />}
+        <Text style={styles.title}>{title}</Text>
+      </View>
 
       <View style={truncated ? { height: availableExcerptHeight, overflow: 'hidden' } : undefined}>
         <Text style={styles.excerpt} onLayout={handleExcerptLayout}>
@@ -57,11 +63,14 @@ export function FeedCard({ item, height, onExpand }: Props) {
         )}
       </View>
 
-      <View style={[styles.actionRow, !truncated && styles.actionRowSingle]}>
+      <View
+        style={[styles.actionRow, !truncated && styles.actionRowSingle]}
+        onLayout={handleFooterLayout}
+      >
         {truncated && (
-          <Pressable style={styles.expandButton} onPress={onExpand}>
+          <Pressable style={styles.expandLink} onPress={onExpand} hitSlop={8}>
             <Text style={styles.expandLabel}>Expand</Text>
-            <ArrowDown size={14} color={colors.bg} />
+            <ArrowDown size={12} color={colors.accent} />
           </Pressable>
         )}
         <Text style={styles.readTime}>
@@ -73,12 +82,13 @@ export function FeedCard({ item, height, onExpand }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: { paddingHorizontal: 20, gap: GAP },
-  spacer: { height: SPACER_HEIGHT },
+  card: { paddingHorizontal: 20, gap: OUTER_GAP },
+  header: { gap: 10 },
+  topSpacer: { height: 8 },
   title: {
     fontFamily: fonts.serifSemiBold,
-    fontSize: 28,
-    lineHeight: 28 * 1.2,
+    fontSize: 22,
+    lineHeight: 22 * 1.25,
     color: colors.textPrimary,
   },
   excerpt: {
@@ -92,18 +102,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    minHeight: ACTION_ROW_HEIGHT,
   },
   actionRowSingle: { justifyContent: 'flex-start' },
-  expandButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.textPrimary,
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-  },
-  expandLabel: { fontFamily: fonts.sansSemiBold, fontSize: 14, color: colors.bg },
+  expandLink: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  expandLabel: { fontFamily: fonts.sansSemiBold, fontSize: 13, color: colors.accent },
   readTime: { fontFamily: fonts.sansRegular, fontSize: 12, color: colors.textTertiary },
 });

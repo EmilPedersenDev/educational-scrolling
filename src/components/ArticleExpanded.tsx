@@ -11,8 +11,10 @@ import {
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { ArrowLeft } from 'lucide-react-native';
+import { CategoryTag } from './CategoryTag';
 import { DailyContent } from '../lib/supabase';
 import { labelForIso } from '../lib/days';
+import { parseTitle } from '../lib/parseTitle';
 import { readTimeMinutes } from '../lib/readTime';
 import { colors, fonts } from '../theme';
 
@@ -22,6 +24,7 @@ type Props = {
 };
 
 export function ArticleExpanded({ item, onBack }: Props) {
+  const { category, title } = parseTitle(item.title);
   const [progress, setProgress] = useState(0);
   const [scrollHeight, setScrollHeight] = useState(0);
   const [layoutHeight, setLayoutHeight] = useState(0);
@@ -66,7 +69,8 @@ export function ArticleExpanded({ item, onBack }: Props) {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{item.title}</Text>
+        {category && <CategoryTag label={category} />}
+        <Text style={styles.title}>{title}</Text>
 
         <View style={styles.meta}>
           <Text style={styles.metaText}>{readTimeMinutes(item.content)} min read</Text>
