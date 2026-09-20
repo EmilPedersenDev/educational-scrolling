@@ -24,3 +24,14 @@ export function buildDays(): Day[] {
     return { iso: toLocalIso(date), label: label(date, offset) };
   });
 }
+
+export function labelForIso(iso: string): string {
+  const [year, month, day] = iso.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  const today = new Date();
+  const offset = Math.round(
+    (new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime() - date.getTime()) /
+      86_400_000
+  );
+  return label(date, offset);
+}
