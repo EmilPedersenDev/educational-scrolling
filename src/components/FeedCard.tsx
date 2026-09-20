@@ -6,7 +6,11 @@ import { DailyContent } from '../lib/supabase';
 import { readTimeMinutes } from '../lib/readTime';
 import { colors, fonts } from '../theme';
 
-const EXCERPT_HEIGHT = 172;
+const SPACER_HEIGHT = 44;
+const GAP = 16;
+const ACTION_ROW_HEIGHT = 48;
+const BOTTOM_BREATHING_ROOM = 8;
+const MIN_EXCERPT_HEIGHT = 60;
 
 type Props = {
   item: DailyContent;
@@ -15,22 +19,33 @@ type Props = {
 };
 
 export function FeedCard({ item, height, onExpand }: Props) {
-  const [naturalHeight, setNaturalHeight] = useState<number | null>(null);
-  const truncated = naturalHeight !== null && naturalHeight > EXCERPT_HEIGHT;
+  const [titleHeight, setTitleHeight] = useState<number | null>(null);
+  const [naturalExcerptHeight, setNaturalExcerptHeight] = useState<number | null>(null);
   const minutes = readTimeMinutes(item.content);
 
-  const handleLayout = (event: LayoutChangeEvent) => {
-    if (naturalHeight === null) setNaturalHeight(event.nativeEvent.layout.height);
+  const measured = titleHeight !== null && naturalExcerptHeight !== null;
+  const chromeHeight = SPACER_HEIGHT + (titleHeight ?? 0) + ACTION_ROW_HEIGHT + GAP * 3 + BOTTOM_BREATHING_ROOM;
+  const availableExcerptHeight = Math.max(MIN_EXCERPT_HEIGHT, height - chromeHeight);
+  const truncated = measured && naturalExcerptHeight! > availableExcerptHeight;
+
+  const handleTitleLayout = (event: LayoutChangeEvent) => {
+    if (titleHeight === null) setTitleHeight(event.nativeEvent.layout.height);
+  };
+
+  const handleExcerptLayout = (event: LayoutChangeEvent) => {
+    if (naturalExcerptHeight === null) setNaturalExcerptHeight(event.nativeEvent.layout.height);
   };
 
   return (
     <View style={[styles.card, { height }]}>
       <View style={styles.spacer} />
 
-      <Text style={styles.title}>{item.title}</Text>
+      <Text style={styles.title} onLayout={handleTitleLayout}>
+        {item.title}
+      </Text>
 
-      <View style={truncated ? { height: EXCERPT_HEIGHT, overflow: 'hidden' } : undefined}>
-        <Text style={styles.excerpt} onLayout={handleLayout}>
+      <View style={truncated ? { height: availableExcerptHeight, overflow: 'hidden' } : undefined}>
+        <Text style={styles.excerpt} onLayout={handleExcerptLayout}>
           {item.content}
         </Text>
         {truncated && (
@@ -58,8 +73,8 @@ export function FeedCard({ item, height, onExpand }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: { paddingHorizontal: 20, gap: 16 },
-  spacer: { height: 44 },
+  card: { paddingHorizontal: 20, gap: GAP },
+  spacer: { height: SPACER_HEIGHT },
   title: {
     fontFamily: fonts.serifSemiBold,
     fontSize: 28,
@@ -77,6 +92,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    minHeight: ACTION_ROW_HEIGHT,
   },
   actionRowSingle: { justifyContent: 'flex-start' },
   expandButton: {

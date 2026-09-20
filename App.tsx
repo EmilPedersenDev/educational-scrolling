@@ -132,7 +132,7 @@ function Screen() {
   const [expandedItem, setExpandedItem] = useState<DailyContent | null>(null);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right', 'bottom']}>
       {expandedItem ? (
         <ArticleExpanded item={expandedItem} onBack={() => setExpandedItem(null)} />
       ) : (
